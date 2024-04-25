@@ -1,9 +1,10 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const {log}=console;
 const {bcrypt,hash} = require('bcrypt');
+const { autoInject } = require('neo-async');
 // const { validate } = require('uuid');
 const client = new Sequelize(
-    'sequelize_practice_db',
+    'team_db',
      'postgres',
       'pass', 
 {
@@ -11,30 +12,45 @@ const client = new Sequelize(
     dialect: 'postgres'
   });
 
-  class Note extends Model{}
-  Note.init(
+  class Team extends Model{}
+  Team.init(
     {
-        text:{
+        team_id:{
+            type:DataTypes.INTEGER,
+            allowNull :false,
+            primaryKey :true,
+            autoIncrement :true
+        },
+        name:{
             type:DataTypes.STRING,
             allowNull:false
+        },coach:{
+            type:DataTypes.STRING
         }
     },
     {
-        sequelize:client
+        sequelize:client,
+        modelName:'team'
     }
   )
 
 
 
-  class User extends Model{
+  class Player extends Model{
     async validatePass(formpassword){
         const is_valid=await compare(formpassword,this.password)
     }
 
   }
 
-  User.init(
+  Player.init(
     {
+        player_id:{
+            type:DataTypes.INTEGER,
+            allowNull:false,
+            primaryKey:true,
+            autoIncrement:true
+        },
         email:{
             type:DataTypes.STRING,
             allowNull:false,
@@ -48,7 +64,20 @@ const client = new Sequelize(
                 len:6
             },
             allowNull:false
+        },
+        first_name:{
+            type:DataTypes.STRING,
+            allowNull:false
+        },
+        last_name:{
+            type:DataTypes.STRING,
+            allowNull:false
+        },
+        age:{
+            type:DataTypes.STRING,
+            allowNull:false
         }
+
     },
     {
         sequelize:client,
@@ -56,84 +85,40 @@ const client = new Sequelize(
            async beforeCreate(user){
                 user.password=await hash(user.password,10)
             }
-        }
+        },
+        modelName:'player'
     }
   )
-User.hasMany(Note)
-Note.belongsTo(User)
+
+Team.belongsToMany(Player,{through:'team_player'})
+Player.belongsToMany(Team,{through:'team_player'})
+
+// User.hasMany(Note)
+// Note.belongsTo(User)
 // recreates the tables and deletes the data
   client.sync({force:false})
   .then(
     async()=>{
-        //create a user 
-        const newUser= await User.create({
-            email:"kenren@udel.edu",
-            password:"123456789abc"
+        const braves = await Team.findByPk(1,{
+            include:Player
         })
-        log(newUser)
-        // how to link to instancts of a table
-        // const findKen= await User.findByPk(1)
-
-        // const kenNotes= await findKen.createNote({
-        //     text:'Note for Ken'
-        // })
-
-        //find a user assoicated with this email
-        // const user = await User.findOne({
-        //     where:{
-        //         email:'kenren@udel.edu'
-        //     },
-        //     include:Note
-        // })
-
-        // await Note.destroy({
-        //     where:{},
-        //     // truncate:true
-        // })
-
-        // const note = await Note.findByPk(1,{include:User})
-
-        // //find all
-        // const users = await Note.findAll({
-        //     attributes:['text'],
-        //     where:{
-        //         id:1
-        //     }
-        // })
-        // find one
-        // const user = await Note.findOne({
-        //     attributes:['text'],
-        //     where:{
-        //         id:1
-        //     }
-        // })
-        // //find by Primary key 
-        // const find_user_by_PrimaryKey = await Note.findByPk(3)
-        // // const note = await Note.create({
-        // //     text:"Text for note One"
-        // // })
-
-        // const note = await Note.update(
-        //     {
-        //         text:`New text for note 1`
-        //     },
-        //     {
-        //         where:{
-        //             id:1
-        //         },
-        //         returning:true
-
-        //     }
-        // )
-        // const noteRemove = await Note.destroy(
-        //     {
-        //         where:{
-        //             id:1
-        //         }
-
-        //     }
-        // )
-        
-        
+        const Julie = await Player.findByPk(2,{
+            include:Team
+        })
+        log(Julie.get({plain:true}))
+    //    const brave = await Team.create({
+    //     name:'Brave',
+    //     type:'baseball',
+    //     coach:'Brian Sniker'
+    //    })
+    //    const Julie=await Player.create({
+    //     email :'Julie@test.com',
+    //     password :"123ABC",
+    //     first_name :"Julie",
+    //     last_name :"Willson",
+    //     age :15
+    //    })
+    //    log(Julie) 
+    //    log(brave)
     }
   )
