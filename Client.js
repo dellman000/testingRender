@@ -10,7 +10,8 @@ new Sequelize(
     process.env.DB_PASSWORD, 
   {
     host: 'localhost',
-    dialect: 'postgres'
+    dialect: 'postgres',
+    logging:false
   });
 
 
