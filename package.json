@@ -31,6 +31,7 @@
     "define-data-property": "^1.1.4",
     "depd": "^2.0.0",
     "destroy": "^1.2.0",
+    "dotenv": "^16.4.5",
     "dottie": "^2.0.6",
     "eastasianwidth": "^0.2.0",
     "ee-first": "^1.1.1",
@@ -88,7 +89,6 @@
     "ms": "^2.0.0",
     "negotiator": "^0.6.3",
     "neo-async": "^2.6.2",
-    "nodemon": "^3.1.0",
     "nopt": "^1.0.10",
     "normalize-path": "^3.0.0",
     "object-inspect": "^1.13.1",
@@ -164,8 +164,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node server.js",
+    "nodemon": "nodemon server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
 }

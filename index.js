@@ -2,96 +2,13 @@ const { Sequelize, DataTypes, Model } = require('sequelize');
 const {log}=console;
 const {bcrypt,hash} = require('bcrypt');
 const { autoInject } = require('neo-async');
+const client=require('./Client')
+const [Team,Player]=require('./Models/index')
 // const { validate } = require('uuid');
-const client = new Sequelize(
-    'team_db',
-     'postgres',
-      'pass', 
-{
-    host: 'localhost',
-    dialect: 'postgres'
-  });
-
-  class Team extends Model{}
-  Team.init(
-    {
-        team_id:{
-            type:DataTypes.INTEGER,
-            allowNull :false,
-            primaryKey :true,
-            autoIncrement :true
-        },
-        name:{
-            type:DataTypes.STRING,
-            allowNull:false
-        },coach:{
-            type:DataTypes.STRING
-        }
-    },
-    {
-        sequelize:client,
-        modelName:'team'
-    }
-  )
 
 
 
-  class Player extends Model{
-    async validatePass(formpassword){
-        const is_valid=await compare(formpassword,this.password)
-    }
 
-  }
-
-  Player.init(
-    {
-        player_id:{
-            type:DataTypes.INTEGER,
-            allowNull:false,
-            primaryKey:true,
-            autoIncrement:true
-        },
-        email:{
-            type:DataTypes.STRING,
-            allowNull:false,
-            validate:{
-                isEmail:true
-            }
-        },
-        password:{
-            type:DataTypes.STRING,
-            validate:{
-                len:6
-            },
-            allowNull:false
-        },
-        first_name:{
-            type:DataTypes.STRING,
-            allowNull:false
-        },
-        last_name:{
-            type:DataTypes.STRING,
-            allowNull:false
-        },
-        age:{
-            type:DataTypes.STRING,
-            allowNull:false
-        }
-
-    },
-    {
-        sequelize:client,
-        hooks:{
-           async beforeCreate(user){
-                user.password=await hash(user.password,10)
-            }
-        },
-        modelName:'player'
-    }
-  )
-
-Team.belongsToMany(Player,{through:'team_player'})
-Player.belongsToMany(Team,{through:'team_player'})
 
 // User.hasMany(Note)
 // Note.belongsTo(User)
